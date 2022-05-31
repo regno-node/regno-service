@@ -10,26 +10,26 @@ defmodule RegnoWeb.MonerodConnectionsView do
     <div class="overflow-x-auto border-x border-t rounded-sm">
     <table class="table-auto text-sm w-full">
     <thead class="border-b">
-    <tr class="bg-gray-100 dark:bg-slate-700">
-      <th phx-click={JS.push("sort", value: %{sort_key: "peer_id"})} class="text-left p-4 font-medium">Peer ID</th>
-      <th phx-click={JS.push("sort", value: %{sort_key: "address"})} class="text-left p-4 font-medium">Host:port</th>
-      <th phx-click={JS.push("sort", value: %{sort_key: "height"})} class="text-left p-4 font-medium">Block height</th>
-      <th phx-click={JS.push("sort", value: %{sort_key: "incoming"})} class="text-left p-4 font-medium">Incoming?</th>
-      <th phx-click={JS.push("sort", value: %{sort_key: "live_time"})} class="text-left p-4 font-medium">Live time</th>
-      <th phx-click={JS.push("sort", value: %{sort_key: "send_idle_time"})} class="text-left p-4 font-medium">Send idle time</th>
-      <th phx-click={JS.push("sort", value: %{sort_key: "recv_idle_time"})} class="text-left p-4 font-medium">Recv idle time</th>
+    <tr class="bg-gray-100 dark:bg-slate-700 text-left">
+      <th phx-click={JS.push("sort", value: %{sort_key: "peer_id"})} class="cursor-pointer p-3 hover:text-orange-500">Peer ID</th>
+      <th phx-click={JS.push("sort", value: %{sort_key: "address"})} class="cursor-pointer p-3 hover:text-orange-500">Host:port</th>
+      <th phx-click={JS.push("sort", value: %{sort_key: "height"})} class="cursor-pointer p-3 hover:text-orange-500">Block height</th>
+      <th phx-click={JS.push("sort", value: %{sort_key: "incoming"})} class="cursor-pointer p-3 hover:text-orange-500">Incoming?</th>
+      <th phx-click={JS.push("sort", value: %{sort_key: "live_time"})} class="cursor-pointer p-3 text-right hover:text-orange-500">Live time</th>
+      <th phx-click={JS.push("sort", value: %{sort_key: "send_idle_time"})} class="cursor-pointer p-3 text-right hover:text-orange-500">Send idle time</th>
+      <th phx-click={JS.push("sort", value: %{sort_key: "recv_idle_time"})} class="cursor-pointer p-3 text-right hover:text-orange-500">Recv idle time</th>
     </tr>
     </thead>
-    <tbody>
+    <tbody class="text-left">
       <%= for peer <- @connections do %>
         <tr class="border-b hover:bg-gray-50 dark:hover:bg-zinc-700">
           <td class="p-3"><%= peer["peer_id"] %></td>
           <td class="p-3"><%= peer["address"] %></td>
           <td class="p-3"><%= peer["height"] %></td>
           <td class="p-3"><%= peer["incoming"] %></td>
-          <td class="p-3"><%= peer["live_time"] %></td>
-          <td class="p-3"><%= peer["send_idle_time"] %></td>
-          <td class="p-3"><%= peer["recv_idle_time"] %></td>
+          <td class="p-3 text-right"><%= peer["live_time"] %></td>
+          <td class="p-3 text-right"><%= peer["send_idle_time"] %></td>
+          <td class="p-3 text-right"><%= peer["recv_idle_time"] %></td>
         </tr>
       <% end %>
     </tbody>
