@@ -19,7 +19,9 @@ defmodule RegnoWeb.HomeLive do
         <div class="dark:text-white max-w-screen-lg w-full mx-auto px-8 pt-8 pb-32 space-y-4">
           <div class="flex flex-col space-y-2 items-center pb-4 border-b border-gray-200
                     sm:flex-row sm:space-y-0 sm:justify-between">
-            <img src="/images/regno.png" class="h-[50px]" alt="Regno"/>
+            <%= live_redirect to: Routes.home_path(@socket, :page), aria_label: "go to home" do %>
+              <img src="/images/regno.png" class="h-[50px]" alt="Regno"/>
+            <% end %>
           </div>
 
           <div class="h-55" role="region" aria-label="monerod info">
@@ -27,7 +29,7 @@ defmodule RegnoWeb.HomeLive do
           </div>
     
           <div class="h-80" role="region" aria-label="sync info">
-            <%= live_render(@socket, RegnoWeb.MonerodSyncInfoView, id: "syncinfoview") %>
+            <%= live_render(@socket, RegnoWeb.MonerodConnectionsView, id: "connectionsview") %>
           </div>
         </div>
       </div>
