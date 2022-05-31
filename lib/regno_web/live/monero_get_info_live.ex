@@ -6,7 +6,7 @@ defmodule RegnoWeb.MonerodGetInfoView do
     ~H"""
     <h2 class="font-bold text-lg mb-3 mt-10">Monerod info</h2>
     <%= if assigns[:get_info] do %>
-      <div class="grid gap-x-10 gap-y-4 grid-flow-col-dense grid-cols-3 grid-rows-3">
+      <div class="grid text-sm gap-x-10 gap-y-4 grid-flow-row-dense sm:grid-flow-col-dense lg:grid-cols-3 lg:grid-rows-3 sm:grid-cols-2 sm:grid-rows-5">
         <div class="flow-root hover:font-bold">
           <span>Current height:</span><span class="float-right"><%= @get_info["height"] %></span>
         </div>
