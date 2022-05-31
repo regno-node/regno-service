@@ -93,6 +93,7 @@ defmodule RegnoWeb.MonerodConnectionsView do
       {:noreply,
        socket
        |> assign(:sort_key, value)
+       |> assign(:sort_dir, :desc)
        |> get_connections()}
     end
   end
