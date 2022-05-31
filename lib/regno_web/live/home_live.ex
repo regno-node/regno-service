@@ -16,7 +16,7 @@ defmodule RegnoWeb.HomeLive do
     ~H"""
     <div class="flex grow h-full font-mono bg-white dark:bg-zinc-800">
       <div class="grow overflow-y-auto">
-        <div class="dark:text-white max-w-screen-lg w-full mx-auto px-8 pt-8 pb-32 space-y-4">
+        <div class="text-black dark:text-white max-w-screen-lg w-full mx-auto px-4 sm:px-8 pt-8 pb-32 space-y-4">
           <div class="flex flex-col space-y-2 items-center pb-4 border-b border-gray-200
                     sm:flex-row sm:space-y-0 sm:justify-between">
             <%= live_redirect to: Routes.home_path(@socket, :page), aria_label: "go to home" do %>
