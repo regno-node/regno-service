@@ -4,8 +4,8 @@ Inspect (and eventually manage) a Regno node through a web interface.
 [[regno_ui.png]]
 
 To start:
-- Install dependencies with `mix deps.get`
-- Create and migrate your database with `mix ecto.setup`
-- Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
+- Install dependencies with =mix deps.get=
+- Create and migrate your database with =mix ecto.setup=
+- Start Phoenix endpoint with =mix phx.server= or inside IEx with =iex -S mix phx.server=
 
 Now you can visit [[http://localhost:8080][localhost:8080]] from your browser.
