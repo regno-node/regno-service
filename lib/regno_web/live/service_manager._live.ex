@@ -29,13 +29,13 @@ defmodule RegnoWeb.ServiceManagerView do
     {:noreply, update(socket, :output, fn output -> "#{output}\n#{line}" end)}
   end
 
-  def handle_info({ref, result}, socket) do
-    IO.puts("handle_info: #{inspect(result)}")
+  def handle_info({_ref, result}, socket) do
+    IO.puts("ServiceManagerView task result: #{inspect(result)}")
     {:noreply, update(socket, :output, fn output -> "#{output}\n#{elem(result, 0)}" end)}
   end
 
   def handle_info({:DOWN, ref, _, _, reason}, state) do
-    IO.puts "Task finished with reason #{inspect(reason)}"
+    IO.puts "ServiceManagerView task #{inspect(ref)} finished with reason #{inspect(reason)}"
     {:noreply, state}
   end
 
