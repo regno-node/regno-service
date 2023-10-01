@@ -51,7 +51,6 @@ defmodule RegnoWeb.MonerodGetInfoView do
       send(self(), {:request_update})
     end
 
-    Logger.info("MonerodGetInfoView: mount")
     {:ok, socket}
   end
 
@@ -61,19 +60,17 @@ defmodule RegnoWeb.MonerodGetInfoView do
   end
 
   def handle_info({:DOWN, ref, _, _, reason}, state) do
-    Logger.info("Task finished with reason #{inspect(reason)}")
+    Logger.info("MonerodGetInfoView update task finished with reason #{inspect(reason)}")
     Process.send_after(self(), {:request_update}, 5000)
     {:noreply, state}
   end
 
-  def handle_info({ref, result}, socket) do
-    Logger.info("MonerodGetInfoView: handle_info")
-    case result do
-      {:ok, get_info} ->
-        {:noreply, assign(socket, :get_info, get_info)}
-      {:error, reason} ->
-        {:noreply, put_flash(socket, :error, reason)}
-    end
+  def handle_info({ref, {:ok, get_info}}, socket) do
+    {:noreply, assign(socket, :get_info, get_info)}
+  end
+
+  def handle_info({ref, {:error, reason}}, socket) do
+    {:noreply, put_flash(socket, :error, reason)}
   end
 
   def monerod_get_info() do

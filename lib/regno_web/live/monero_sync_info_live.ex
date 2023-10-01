@@ -46,8 +46,6 @@ defmodule RegnoWeb.MonerodConnectionsView do
       send(self(), {:request_update})
     end
 
-    Logger.info("MonerodSyncInfoView: mount")
-
     {:ok,
      socket
      |> assign(:sort_key, "live_time")
@@ -55,13 +53,12 @@ defmodule RegnoWeb.MonerodConnectionsView do
   end
 
   def handle_info({:request_update}, socket) do
-    Logger.info("MonerodSyncInfoView: handle_info")
     Task.async(fn -> get_connections() end)
     {:noreply, socket}
   end
 
   def handle_info({:DOWN, ref, _, _, reason}, state) do
-    Logger.info("MoneroSyncInfo task finished with reason #{inspect(reason)}")
+    Logger.info("MonerodSyncInfo update task finished with reason #{inspect(reason)}")
     Process.send_after(self(), {:request_update}, 5000)
     {:noreply, state}
   end
@@ -89,7 +86,7 @@ defmodule RegnoWeb.MonerodConnectionsView do
   def handle_info({:error, reason}, socket) do
     error = "Failed to get connections: #{reason}"
     Logger.error(error)
-    {:noreply, put_flash(socket, :error, reason)}
+    {:noreply, put_flash(socket, :error, error)}
   end
 
   def get_connections() do
@@ -98,7 +95,6 @@ defmodule RegnoWeb.MonerodConnectionsView do
 
   def handle_event("sort", %{"sort_key" => value}, socket) do
     if socket.assigns.sort_key == value do
-      Logger.info("sort dir")
       new_sort_dir = toggle_sort_dir(socket.assigns.sort_dir)
       {:noreply,
         socket
