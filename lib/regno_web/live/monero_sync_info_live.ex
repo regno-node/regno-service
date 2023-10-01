@@ -67,20 +67,20 @@ defmodule RegnoWeb.MonerodConnectionsView do
     {:noreply, assign(socket, :connections, sort_connections(connections, socket.assigns.sort_key, socket.assigns.sort_dir))}
   end
 
-  def sort_connections(connections, sort_key, sort_dir) do
-    Enum.sort_by(
-      connections,
-      fn peer -> peer[sort_key] end,
-      sort_dir
-    )
-  end
-
   def handle_info({_ref, {:ok, _}}, socket) do
     {:noreply, assign(socket, :connections, [])}
   end
 
   def handle_info({_ref, {:error, reason}}, socket) do
     {:noreply, put_flash(socket, :error, reason)}
+  end
+
+  def sort_connections(connections, sort_key, sort_dir) do
+    Enum.sort_by(
+      connections,
+      fn peer -> peer[sort_key] end,
+      sort_dir
+    )
   end
 
   def get_connections() do
