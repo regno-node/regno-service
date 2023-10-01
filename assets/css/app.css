@@ -122,3 +122,12 @@
   100% { opacity: 0; }
 }
 
+.terminal-window {
+  background-color: #000;
+  color: #33FF00;
+  width: 800px;
+  height: 400px;
+  padding: 10px;
+  border-radius: 5px;
+  overflow: auto;
+}

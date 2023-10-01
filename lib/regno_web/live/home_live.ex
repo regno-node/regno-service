@@ -3,7 +3,7 @@ defmodule RegnoWeb.HomeLive do
 
   def mount(_params, _session, socket) do
     if connected?(socket) do
-      
+
     end
 
     {:ok, assign(socket,
@@ -27,7 +27,11 @@ defmodule RegnoWeb.HomeLive do
           <div class="h-55" role="region" aria-label="monerod info">
             <%= live_render(@socket, RegnoWeb.MonerodGetInfoView, id: "getinfoview") %>
           </div>
-    
+
+          <div class="h-70" role="region" aria-label="service manager">
+            <%= live_render(@socket, RegnoWeb.ServiceManagerView, id: "servicemanagerview") %>
+          </div>
+
           <div class="h-80" role="region" aria-label="sync info">
             <%= live_render(@socket, RegnoWeb.MonerodConnectionsView, id: "connectionsview") %>
           </div>
