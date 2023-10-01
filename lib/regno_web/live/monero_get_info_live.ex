@@ -41,29 +41,34 @@ defmodule RegnoWeb.MonerodGetInfoView do
         </div>
       </div>
     <% else %>
-    <p>Waiting to connect to monerod...</p>
+    <p>Waiting for monerod...</p>
     <% end %>
     """
   end
 
   def mount(_params, _session, socket) do
     if connected?(socket) do
-      Process.send_after(self(), :update, 5000)
+      send(self(), {:request_update})
     end
 
     Logger.info("MonerodGetInfoView: mount")
-    case monerod_get_info() do
-      {:ok, get_info} ->
-        {:ok, assign(socket, :get_info, get_info)}
-      {:error, reason} ->
-        {:ok, put_flash(socket, :error, reason)}
-    end
+    {:ok, socket}
   end
 
-  def handle_info(:update, socket) do
-    Process.send_after(self(), :update, 5000)
+  def handle_info({:request_update}, socket) do
+    Task.async(fn -> monerod_get_info() end)
+    {:noreply, socket}
+  end
+
+  def handle_info({:DOWN, ref, _, _, reason}, state) do
+    Logger.info("Task finished with reason #{inspect(reason)}")
+    Process.send_after(self(), {:request_update}, 5000)
+    {:noreply, state}
+  end
+
+  def handle_info({ref, result}, socket) do
     Logger.info("MonerodGetInfoView: handle_info")
-    case monerod_get_info() do
+    case result do
       {:ok, get_info} ->
         {:noreply, assign(socket, :get_info, get_info)}
       {:error, reason} ->
@@ -72,14 +77,7 @@ defmodule RegnoWeb.MonerodGetInfoView do
   end
 
   def monerod_get_info() do
-    case Monero.Daemon.get_info |> Monero.request do
-      {:ok, info} ->
-        {:ok, info}
-
-      {:error, reason} ->
-        error = "Failed to do get_info: #{reason}"
-        Logger.error(error)
-        {:error, error}
-    end
+    Monero.Daemon.get_info |> Monero.request
   end
+
 end

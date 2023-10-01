@@ -36,14 +36,14 @@ defmodule RegnoWeb.MonerodConnectionsView do
     </table>
     </div>
     <% else %>
-    <p>Waiting to connect to monerod...</p>
+    <p>Waiting for monerod...</p>
     <% end %>
     """
   end
 
   def mount(_params, _session, socket) do
     if connected?(socket) do
-      Process.send_after(self(), :update, 5000)
+      send(self(), {:request_update})
     end
 
     Logger.info("MonerodSyncInfoView: mount")
@@ -51,50 +51,67 @@ defmodule RegnoWeb.MonerodConnectionsView do
     {:ok,
      socket
      |> assign(:sort_key, "live_time")
-     |> assign(:sort_dir, :desc)
-     |> get_connections()}
+     |> assign(:sort_dir, :desc)}
   end
 
-  def handle_info(:update, socket) do
-    Process.send_after(self(), :update, 5000)
+  def handle_info({:request_update}, socket) do
     Logger.info("MonerodSyncInfoView: handle_info")
-    {:noreply, get_connections(socket)}
+    Task.async(fn -> get_connections() end)
+    {:noreply, socket}
   end
 
-  def get_connections(socket) do
-    case Monero.Daemon.get_connections() |> Monero.request() do
-      {:ok, result} ->
-        assign(
-          socket,
-          :connections,
-          Enum.sort_by(
-            result["connections"],
-            fn peer -> peer[socket.assigns.sort_key] end,
-            socket.assigns.sort_dir
-          )
-        )
+  def handle_info({:DOWN, ref, _, _, reason}, state) do
+    Logger.info("MoneroSyncInfo task finished with reason #{inspect(reason)}")
+    Process.send_after(self(), {:request_update}, 5000)
+    {:noreply, state}
+  end
 
-      {:error, reason} ->
-        error = "Failed to get connections: #{reason}"
-        Logger.error(error)
-        put_flash(socket, :error, reason)
-    end
+  def handle_info({ref, {:ok, %{"connections" => connections}}}, socket) do
+    {:noreply, assign(socket, :connections, sort_connections(connections, socket.assigns.sort_key, socket.assigns.sort_dir))}
+  end
+
+  def sort_connections(connections, sort_key, sort_dir) do
+    Enum.sort_by(
+      connections,
+      fn peer -> peer[sort_key] end,
+      sort_dir
+    )
+  end
+
+  def handle_info({ref, {:ok, _}}, socket) do
+    {:noreply, assign(socket, :connections, [])}
+  end
+
+  def handle_info({ref, {:error, reason}}, socket) do
+    {:noreply, put_flash(socket, :error, reason)}
+  end
+
+  def handle_info({:error, reason}, socket) do
+    error = "Failed to get connections: #{reason}"
+    Logger.error(error)
+    {:noreply, put_flash(socket, :error, reason)}
+  end
+
+  def get_connections() do
+    Monero.Daemon.get_connections() |> Monero.request()
   end
 
   def handle_event("sort", %{"sort_key" => value}, socket) do
     if socket.assigns.sort_key == value do
       Logger.info("sort dir")
+      new_sort_dir = toggle_sort_dir(socket.assigns.sort_dir)
       {:noreply,
-       socket
-       |> assign(:sort_dir, toggle_sort_dir(socket.assigns.sort_dir))
-       |> get_connections()
-       }
+        socket
+        |> assign(:sort_dir, new_sort_dir)
+        |> assign(:connections, sort_connections(socket.assigns.connections, socket.assigns.sort_key, new_sort_dir))
+      }
     else
       {:noreply,
        socket
        |> assign(:sort_key, value)
        |> assign(:sort_dir, :desc)
-       |> get_connections()}
+       |> assign(:connections, sort_connections(socket.assigns.connections, value, :desc))
+      }
     end
   end
 
