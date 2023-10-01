@@ -8,19 +8,19 @@ defmodule RegnoWeb.ServiceManagerView do
 
   def handle_event("run_regno_start", _value, socket) do
     IO.puts("Received run_regno_start")
-    Task.async(fn -> Regno.ServiceManager.start(self()) end)
+    Task.async(fn -> Regno.ServiceManager.start() end)
     {:noreply, socket}
   end
 
   def handle_event("run_regno_stop", _value, socket) do
     IO.puts("Received run_regno_stop")
-    Task.async(fn -> Regno.ServiceManager.stop(self()) end)
+    Task.async(fn -> Regno.ServiceManager.stop() end)
     {:noreply, socket}
   end
 
   def handle_event("run_regno_sync", _value, socket) do
     IO.puts("Received run_regno_sync")
-    Task.async(fn -> Regno.ServiceManager.sync(self()) end)
+    Task.async(fn -> Regno.ServiceManager.sync() end)
     {:noreply, socket}
   end
 
