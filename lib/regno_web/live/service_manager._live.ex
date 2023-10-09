@@ -21,9 +21,9 @@ defmodule RegnoWeb.ServiceManagerView do
     {:noreply, put_flash(socket, :error, "A command is already running.")}
   end
 
-  defp run_cmd("regno_start", pid), do: Regno.ServiceManager.start(pid)
-  defp run_cmd("regno_stop", pid), do: Regno.ServiceManager.stop(pid)
-  defp run_cmd("regno_help", pid), do: Regno.ServiceManager.help(pid)
+  defp run_cmd("regno_start", pid), do: Regno.ServiceCommand.start(pid)
+  defp run_cmd("regno_stop", pid), do: Regno.ServiceCommand.stop(pid)
+  defp run_cmd("regno_help", pid), do: Regno.ServiceCommand.help(pid)
 
   def handle_info({:cmd_output, ref, cmd_output}, %{assigns: %{current_task: %Task{pid: ref}}} = socket) do
     {:noreply, update(socket, :output, fn output -> "#{output}\n#{cmd_output}" end)}

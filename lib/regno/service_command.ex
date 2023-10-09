@@ -1,6 +1,4 @@
-
-
-defmodule Regno.ServiceManager do
+defmodule Regno.ServiceCommand do
   @regno_script_path "../regno/regno.sh"
 
   def start(pid) do
