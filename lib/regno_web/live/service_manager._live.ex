@@ -3,49 +3,50 @@ defmodule RegnoWeb.ServiceManagerView do
   require Logger
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, output: "")}
+    {
+      :ok,
+      socket
+      |> assign(output: "")
+      |> assign(current_task: nil)
+    }
   end
 
-  def handle_event("run_regno_start", _value, socket) do
-    IO.puts("Received run_regno_start")
-    Task.async(fn -> Regno.ServiceManager.start() end)
-    {:noreply, socket}
+  def handle_event("run_cmd", %{"cmd" => cmd}, %{assigns: %{current_task: nil}} = socket) do
+    my_pid = self()
+    {:noreply, assign(socket, :current_task, Task.async(fn -> run_cmd(cmd, my_pid) end))}
   end
 
-  def handle_event("run_regno_stop", _value, socket) do
-    IO.puts("Received run_regno_stop")
-    Task.async(fn -> Regno.ServiceManager.stop() end)
-    {:noreply, socket}
+  def handle_event("run_cmd", _, %{assigns: %{current_task: task}} = socket) when task != nil do
+    IO.puts("Cmd already running. Not starting a new one.")
+    {:noreply, put_flash(socket, :error, "A command is already running.")}
   end
 
-  def handle_event("run_regno_sync", _value, socket) do
-    IO.puts("Received run_regno_sync")
-    Task.async(fn -> Regno.ServiceManager.sync() end)
-    {:noreply, socket}
+  defp run_cmd("regno_start", pid), do: Regno.ServiceManager.start(pid)
+  defp run_cmd("regno_stop", pid), do: Regno.ServiceManager.stop(pid)
+  defp run_cmd("regno_help", pid), do: Regno.ServiceManager.help(pid)
+
+  def handle_info({:cmd_output, ref, cmd_output}, %{assigns: %{current_task: %Task{pid: ref}}} = socket) do
+    {:noreply, update(socket, :output, fn output -> "#{output}\n#{cmd_output}" end)}
   end
 
-  def handle_info({:service_manager_output, line}, socket) do
-    IO.puts("Received output: #{line}")
-    {:noreply, update(socket, :output, fn output -> "#{output}\n#{line}" end)}
-  end
-
-  def handle_info({_ref, result}, socket) do
+  def handle_info({ref, result}, socket) do
     IO.puts("ServiceManagerView task result: #{inspect(result)}")
-    {:noreply, update(socket, :output, fn output -> "#{output}\n#{elem(result, 0)}" end)}
+    Process.demonitor(ref, [:flush])
+    {:noreply, assign(socket, :current_task, nil)}
   end
 
-  def handle_info({:DOWN, ref, _, _, reason}, state) do
-    IO.puts "ServiceManagerView task #{inspect(ref)} finished with reason #{inspect(reason)}"
-    {:noreply, state}
+  def handle_info({:DOWN, ref, _, _, reason}, socket) do
+    IO.puts("ServiceManagerView task #{inspect(ref)} finished with reason #{inspect(reason)}")
+    {:noreply, assign(socket, :current_task, nil)}
   end
 
   def render(assigns) do
-    ~H"""
+    ~L"""
     <div>
       <h2 class="font-bold text-lg mb-3 mt-10">Services</h2>
-      <button phx-click="run_regno_start">Start all</button>
-      <button phx-click="run_regno_stop">Stop all</button>
-      <button phx-click="run_regno_sync">Sync services</button>
+      <button phx-click="run_cmd" phx-value-cmd="regno_start" <%= if @current_task != nil, do: "disabled" %> >Start all</button>
+      <button phx-click="run_cmd" phx-value-cmd="regno_stop" <%= if @current_task != nil, do: "disabled" %>>Stop all</button>
+      <button phx-click="run_cmd" phx-value-cmd="regno_help" <%= if @current_task != nil, do: "disabled" %>>Help</button>
       <div id="terminal" class="terminal-window" phx-hook="TerminalScroll">
         <pre><%= @output %></pre>
       </div>
